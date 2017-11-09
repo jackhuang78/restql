@@ -17,9 +17,9 @@ parser.addArgument(['-p', '--port'], {
 });
 const args = parser.parseArgs();
 
-
+// Create logger
 const logger = winston.createLogger({
-	level: 'info',
+	level: 'info',	// TODO: add colors
 	format: winston.format.json(),
 	transports: [
 		new winston.transports.File({ 
