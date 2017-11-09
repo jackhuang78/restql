@@ -1,7 +1,7 @@
 {
   "name": "restql",
   "version": "1.0.0",
-  "description": "",
+  "description": "Restql",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argparse": "^1.0.9",
     "express": "^4.16.2"
   },
   "devDependencies": {

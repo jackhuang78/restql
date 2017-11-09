@@ -1,5 +1,23 @@
+const ArgumentParser = require('argparse').ArgumentParser;
 const express = require('express');
 const Restql = require('./restql');
+const npmPackage = require('../package.json');
+
+// Parse arguments
+const parser = new ArgumentParser({
+	addHelp: true,
+	description: npmPackage.description,
+	version: npmPackage.version,
+});
+parser.addArgument(['-p', '--port'], {
+	dest: 'port',
+	type: 'int',
+	defaultValue: 3000,
+});
+const args = parser.parseArgs();
+
+console.log(args);
+
 
 // Create an Express app
 const app = express();
@@ -10,6 +28,6 @@ app.get('/', (req, res) => {
 });
 
 // Start the app as a server
-app.listen(3000, () => {
-	console.log('Example app listening on port 3000!');
+app.listen(args.port, () => {
+	console.log(`Example app listening on port ${args.port}!`);
 });
