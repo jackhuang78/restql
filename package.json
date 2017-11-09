@@ -21,7 +21,7 @@
   },
 
   "//": [
-    "ESLint configuration",
+    "ESLint configuration"
   ],
   "eslintConfig": {
     "env": {

@@ -10,7 +10,7 @@ const parser = new ArgumentParser({
 	description: npmPackage.description,
 	version: npmPackage.version,
 });
-parser.addArgument(['-p', '--port'], {
+parser.addArgument(['--port'], {
 	dest: 'port',
 	type: 'int',
 	defaultValue: 3000,
