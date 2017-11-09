@@ -18,5 +18,32 @@
   "devDependencies": {
     "eslint": "^4.10.0",
     "eslint-plugin-react": "^7.4.0"
+  },
+
+  "//": [
+    "ESLint configuration",
+  ],
+  "eslintConfig": {
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        }
+    },
+    "plugins": ["react"],
+    "rules": {
+        "indent": ["warn", "tab"],
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["warn", "single"],
+        "semi": ["warn", "always"],
+        "no-console": "warn",
+        "no-unused-vars": "warn"
+    }
   }
 }
