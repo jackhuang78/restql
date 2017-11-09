@@ -1,3 +1,4 @@
+// This is the configuration for ESLint.
 {
     "env": {
         "browser": true,
