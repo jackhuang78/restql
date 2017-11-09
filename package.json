@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "argparse": "^1.0.9",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "winston": "^3.0.0-rc1"
   },
   "devDependencies": {
     "eslint": "^4.10.0",

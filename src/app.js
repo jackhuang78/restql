@@ -1,7 +1,23 @@
+const winston = require('winston');
 const ArgumentParser = require('argparse').ArgumentParser;
 const express = require('express');
 const Restql = require('./restql');
 const npmPackage = require('../package.json');
+
+const logger = winston.createLogger({
+	level: 'info',
+	format: winston.format.json(),
+	transports: [
+		new winston.transports.File({ 
+			filename: 'log/app.log.info', 
+		})
+	],
+});
+if (process.env.NODE_ENV !== 'production') {
+	logger.add(new winston.transports.Console({
+		format: winston.format.simple()
+	}));
+}
 
 // Parse arguments
 const parser = new ArgumentParser({
@@ -16,7 +32,7 @@ parser.addArgument(['-p', '--port'], {
 });
 const args = parser.parseArgs();
 
-console.log(args);
+logger.info('Command line arguments', args);
 
 
 // Create an Express app
