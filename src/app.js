@@ -4,21 +4,6 @@ const express = require('express');
 const Restql = require('./restql');
 const npmPackage = require('../package.json');
 
-const logger = winston.createLogger({
-	level: 'info',
-	format: winston.format.json(),
-	transports: [
-		new winston.transports.File({ 
-			filename: 'log/app.log.info', 
-		})
-	],
-});
-if (process.env.NODE_ENV !== 'production') {
-	logger.add(new winston.transports.Console({
-		format: winston.format.simple()
-	}));
-}
-
 // Parse arguments
 const parser = new ArgumentParser({
 	addHelp: true,
@@ -31,6 +16,24 @@ parser.addArgument(['-p', '--port'], {
 	defaultValue: 3000,
 });
 const args = parser.parseArgs();
+
+
+const logger = winston.createLogger({
+	level: 'info',
+	format: winston.format.json(),
+	transports: [
+		new winston.transports.File({ 
+			filename: 'log/app.log', 
+		})
+	],
+});
+if (process.env.NODE_ENV !== 'production') {
+	logger.add(new winston.transports.Console({
+		format: winston.format.simple()
+	}));
+}
+
+
 
 logger.info('Command line arguments', args);
 
@@ -45,5 +48,5 @@ app.get('/', (req, res) => {
 
 // Start the app as a server
 app.listen(args.port, () => {
-	console.log(`Example app listening on port ${args.port}!`);
+	logger.info(`Example app listening on port ${args.port}!`);
 });
