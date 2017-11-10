@@ -13,6 +13,7 @@
   "dependencies": {
     "argparse": "^1.0.9",
     "express": "^4.16.2",
+    "mysql": "^2.15.0",
     "winston": "^3.0.0-rc1"
   },
   "devDependencies": {
@@ -20,7 +21,8 @@
     "eslint": "^4.10.0",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.4.0",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "promised-exec": "^1.0.1"
   },
   "//": [
     "ESLint configuration"
@@ -28,7 +30,7 @@
   "eslintConfig": {
     "env": {
       "browser": true,
-      "es6": true,
+      "es8": true,
       "node": true,
       "mocha": true
     },
