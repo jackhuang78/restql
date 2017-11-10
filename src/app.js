@@ -1,7 +1,7 @@
 const winston = require('winston');
 const ArgumentParser = require('argparse').ArgumentParser;
 const express = require('express');
-const Restql = require('./restql');
+const Restql = require('./Restql');
 const npmPackage = require('../package.json');
 
 // Parse arguments
