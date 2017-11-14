@@ -4,7 +4,7 @@ const mysql = require('mysql');
 
 const escId = mysql.escapeId;
 const esc = mysql.escape;
-const _formWhere = (query) => Object.entries(query)
+const formWhere = (query) => Object.entries(query)
 	.map(([key, value]) => `${escId(key)}=${esc(value)}`)
 	.reduce((cond1, cond2) => `${cond1} AND ${cond2}`, 'TRUE');
 
@@ -24,7 +24,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			const records = await connection.exec(
-				`SELECT * FROM ${escId(table)} WHERE ${_formWhere(query)};`
+				`SELECT * FROM ${escId(table)} WHERE ${formWhere(query)};`
 			);
 			return records;
 
