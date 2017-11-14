@@ -11,11 +11,11 @@ class Connection {
 			multipleStatements: true,
 		});
 	}
-
+	
 	async exec(sql) {
 		return new Promise((res, rej) => {
 			logger.info(`SQL> ${sql}`);
-			this.connection.query(sql, (err, rows, ignore) => {
+			this.connection.query(sql, (err, rows, fields) => {
 				return err ? rej(err) : res(rows);
 			});
 		});

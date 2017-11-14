@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "chai-also": "^0.1.0",
     "eslint": "^4.10.0",
     "eslint-plugin-mocha": "^4.11.0",
     "eslint-plugin-react": "^7.4.0",
@@ -64,7 +65,8 @@
         "always"
       ],
       "no-console": "warn",
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      "no-empty": "warn"
     }
   }
 }

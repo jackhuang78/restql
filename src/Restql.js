@@ -1,22 +1,39 @@
 const logger = require('./logger');
 const Connection = require('./Connection');
+const mysql = require('mysql');
+
+const escId = mysql.escapeId;
+const esc = mysql.escape;
 
 class Restql {
 	constructor(host, user, password, database) {
-		this.connection = new Connection(host, user, password, database);
+		this.host = host;
+		this.user = user;
+		this.password = password;
+		this.database = database;
 	}
 
-	async get(table, id) {
-		await this.connection.connect();
+	_connect() {
+		return new Connection(this.host, this.user, this.password, this.database);
+	}
+
+	async get(table, query) {
+		const connection = this._connect();
 		try {
-			const records = await this.connection.exec(
-				`SELECT * FROM ${table} WHERE film_id=${id};`
+			const records = await connection.exec(
+				`SELECT * FROM ${escId(table)} WHERE ${this._formWhere(query)};`
 			);
-			return (records.length == 0) ? null : records[0];
+			return records;
 
 		} finally {
-			await this.connection.end();	
+			await connection.end();	
 		}
+	}
+
+	_formWhere(query) {
+		return Object.entries(query)
+			.map(([key, value]) => `${escId(key)}=${esc(value)}`)
+			.reduce((cond1, cond2) => `${cond1} AND ${cond2}`, 'TRUE');
 	}
 }
 
