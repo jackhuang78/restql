@@ -32,6 +32,18 @@ class Restql {
 			await connection.end();	
 		}
 	}
+
+	async delete(table, query) {
+		const connection = this._connect();
+		try {
+			const result = await connection.exec(
+				`DELETE FROM ${escId(table)} WHERE ${formWhere(query)};`
+			);
+			return result;
+		} finally {
+			await connection.end();
+		}
+	}
 }
 
 module.exports = Restql;

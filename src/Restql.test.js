@@ -16,9 +16,12 @@ describe('#Restql', () => {
 			| mysql -u root');
 	});
 
+	let restql;
+	beforeEach(() => {
+		restql = new Restql('localhost', 'root', '', 'sakila');
+	}); 
+
 	describe('#get', () => {
-		const restql = new Restql('localhost', 'root', '', 'sakila');
-		
 		it('should read a record by querying int', async () => {
 			const films = await restql.get('film', {film_id: 2});
 			expect(films).to.have.lengthOf(1);
@@ -44,9 +47,17 @@ describe('#Restql', () => {
 		it('should read multiple records by query', async () => {
 			const films = await restql.get('film', {release_year: 2006});
 			expect(films).to.have.lengthOf(1000);
-			for(let film of films) {
+			for(const film of films) {
 				expect(film).to.have.property('release_year', 2006);
 			}
+		});
+	});
+
+	describe('#delete', () => {
+		it('should delete a record', async () => {
+			await restql.delete('film_actor', {film_id: 1, actor_id: 1});
+			const film_actor = await restql.get('film_actor', {film_id: 1, actor_id: 1});
+			expect(film_actor).to.have.lengthOf(0);
 		});
 	});
 });
