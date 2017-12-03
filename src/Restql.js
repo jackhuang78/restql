@@ -29,6 +29,12 @@ function formFieldsAndValues(entries) {
 	return [fields, values];
 }
 
+function formSetStmt(entry) {
+	return Object.entries(entry)
+		.map(([key, value]) => `${escId(key)}=${esc(value)}`)
+		.join(',');
+}
+
 class Restql {
 	constructor(host, user, password, database) {
 		this.host = host;
@@ -72,6 +78,17 @@ class Restql {
 			const [fields, values] = formFieldsAndValues(entries);
 			await connection.exec(
 				`INSERT INTO ${escId(table)}(${fields}) VALUES (${values});`
+			);
+		} finally {
+			await connection.end();
+		}
+	}
+
+	async put(table, entry, query) {
+		const connection = this._connect();
+		try {
+			await connection.exec(
+				`UPDATE ${escId(table)} SET ${formSetStmt(entry)} WHERE ${formWhere(query)};`
 			);
 		} finally {
 			await connection.end();

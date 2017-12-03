@@ -83,4 +83,13 @@ describe('#Restql', () => {
 			expect(films_added_2[0]).to.have.property('title', 'My Film 2');
 		});
 	});
+
+	describe('#put', () => {
+		it('should update a record', async () => {
+			await restql.put('film', {title: 'My Film'}, {film_id: 1});
+			const film_updated = await restql.get('film', {film_id: 1});
+			expect(film_updated).to.have.lengthOf(1);
+			expect(film_updated[0]).to.have.property('title', 'My Film');
+		});
+	});
 });
