@@ -5,13 +5,13 @@ const mysql = require('mysql');
 const escId = mysql.escapeId;
 const esc = mysql.escape;
 
-function formWhere(query) {
+function formWhereStmt(query) {
 	return Object.entries(query)
 		.map(([key, value]) => `${escId(key)}=${esc(value)}`)
 		.reduce((cond1, cond2) => `${cond1} AND ${cond2}`, 'TRUE');
 }
 
-function formFieldsAndValues(entries) {
+function formFieldsAndValuesStmt(entries) {
 	const combinedEntries = entries.reduce(
 		(entry1, entry2) => Object.assign({}, entry1, entry2));
 	
@@ -51,7 +51,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			const records = await connection.exec(
-				`SELECT * FROM ${escId(table)} WHERE ${formWhere(query)};`
+				`SELECT * FROM ${escId(table)} WHERE ${formWhereStmt(query)};`
 			);
 			return records;
 
@@ -64,7 +64,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			const result = await connection.exec(
-				`DELETE FROM ${escId(table)} WHERE ${formWhere(query)};`
+				`DELETE FROM ${escId(table)} WHERE ${formWhereStmt(query)};`
 			);
 			return result;
 		} finally {
@@ -75,7 +75,7 @@ class Restql {
 	async post(table, entries) {
 		const connection = this._connect();
 		try {
-			const [fields, values] = formFieldsAndValues(entries);
+			const [fields, values] = formFieldsAndValuesStmt(entries);
 			await connection.exec(
 				`INSERT INTO ${escId(table)}(${fields}) VALUES (${values});`
 			);
@@ -88,7 +88,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			await connection.exec(
-				`UPDATE ${escId(table)} SET ${formSetStmt(entry)} WHERE ${formWhere(query)};`
+				`UPDATE ${escId(table)} SET ${formSetStmt(entry)} WHERE ${formWhereStmt(query)};`
 			);
 		} finally {
 			await connection.end();
