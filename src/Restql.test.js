@@ -60,4 +60,27 @@ describe('#Restql', () => {
 			expect(film_actor).to.have.lengthOf(0);
 		});
 	});
+
+	describe('#post', () => {
+		it('should create a record', async () => {
+			await restql.post('film', [{title: 'My Film', language_id: 1}]);
+			const films_added = await restql.get('film', {title: 'My Film'});
+			expect(films_added).to.have.lengthOf(1);
+			expect(films_added[0]).to.have.property('title', 'My Film');
+		});
+
+		it('should create multiple records', async () => {
+			await restql.post('film', [
+				{title: 'My Film 1', language_id: 1},
+				{title: 'My Film 2', language_id: 1}
+			]);
+			const films_added_1 = await restql.get('film', {title: 'My Film 1'});
+			expect(films_added_1).to.have.lengthOf(1);
+			expect(films_added_1[0]).to.have.property('title', 'My Film 1');
+
+			const films_added_2 = await restql.get('film', {title: 'My Film 2'});
+			expect(films_added_2).to.have.lengthOf(1);
+			expect(films_added_2[0]).to.have.property('title', 'My Film 2');
+		});
+	});
 });
