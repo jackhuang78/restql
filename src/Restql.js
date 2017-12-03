@@ -54,18 +54,6 @@ class Restql {
 		}
 	}
 
-	async post(table, entries) {
-		const connection = this._connect();
-		try {
-			const [fields, values] = formFieldsAndValues(entries);
-			await connection.exec(
-				`INSERT INTO ${escId(table)}(${fields}) VALUES (${values});`
-			);
-		} finally {
-			await connection.end();
-		}
-	}
-
 	async delete(table, query) {
 		const connection = this._connect();
 		try {
@@ -73,6 +61,18 @@ class Restql {
 				`DELETE FROM ${escId(table)} WHERE ${formWhere(query)};`
 			);
 			return result;
+		} finally {
+			await connection.end();
+		}
+	}
+
+	async post(table, entries) {
+		const connection = this._connect();
+		try {
+			const [fields, values] = formFieldsAndValues(entries);
+			await connection.exec(
+				`INSERT INTO ${escId(table)}(${fields}) VALUES (${values});`
+			);
 		} finally {
 			await connection.end();
 		}
