@@ -1,8 +1,5 @@
 const logger = require('./logger');
-const mysql = require('mysql');
-
-const escId = mysql.escapeId;
-const esc = mysql.escape;
+const {createConnection, escapeId, escape} = require('mysql');
 
 class Restql {
 	constructor(host, user, password, database) {
@@ -20,7 +17,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			const records = await connection.exec(
-				`SELECT * FROM ${escId(table)} WHERE ${formWhereStmt(query)};`
+				`SELECT * FROM ${escapeId(table)}${whereStmt(query)};`
 			);
 			return records;
 
@@ -33,7 +30,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			const result = await connection.exec(
-				`DELETE FROM ${escId(table)} WHERE ${formWhereStmt(query)};`
+				`DELETE FROM ${escapeId(table)}${whereStmt(query)};`
 			);
 			return result;
 		} finally {
@@ -46,7 +43,7 @@ class Restql {
 		try {
 			const [fields, values] = formFieldsAndValuesStmt(entries);
 			await connection.exec(
-				`INSERT INTO ${escId(table)}(${fields}) VALUES (${values});`
+				`INSERT INTO ${escapeId(table)}(${fields}) VALUES ${values};`
 			);
 		} finally {
 			await connection.end();
@@ -57,7 +54,7 @@ class Restql {
 		const connection = this._connect();
 		try {
 			await connection.exec(
-				`UPDATE ${escId(table)} SET ${formSetStmt(entry)} WHERE ${formWhereStmt(query)};`
+				`UPDATE ${escapeId(table)} SET ${formSetStmt(entry)}${whereStmt(query)};`
 			);
 		} finally {
 			await connection.end();
@@ -65,9 +62,45 @@ class Restql {
 	}
 }
 
+function whereStmt(query) {
+	if(Object.entries(query).length == 0) {
+		return '';
+	}
+
+	const conditions = Object.entries(query)
+		.map(([key, value]) => `${escapeId(key)}=${escape(value)}`)
+		.join(' AND ');
+	return ` WHERE ${conditions}`;
+}
+
+function formFieldsAndValuesStmt(entries) {
+	const combinedEntries = entries.reduce(
+		(entry1, entry2) => Object.assign({}, entry1, entry2));
+	
+	const fields = Object.keys(combinedEntries)
+		.map(escapeId)
+		.join(',');
+
+	const values = entries
+		.map(entry => Object.keys(combinedEntries)
+			.map(field => escape(entry[field]))
+			.join(','))
+		.map(values => `(${values})`)
+		.join(',');
+
+	return [fields, values];
+}
+
+function formSetStmt(entry) {
+	return Object.entries(entry)
+		.map(([key, value]) => `${escapeId(key)}=${escape(value)}`)
+		.join(',');
+}
+
+
 class Connection {
 	constructor(host, user, password, database) {
-		this.mysqlConnection = mysql.createConnection({
+		this.session = createConnection({
 			host: host,
 			user: user,
 			password: password,
@@ -78,8 +111,8 @@ class Connection {
 	
 	async exec(sql) {
 		return new Promise((res, rej) => {
-			logger.info(`SQL> ${sql}`);
-			this.mysqlConnection.query(sql, (err, rows, fields) => {
+			logger.debug(`SQL> ${sql}`);
+			this.session.query(sql, (err, rows, fields) => {
 				return err ? rej(err) : res(rows);
 			});
 		});
@@ -87,7 +120,7 @@ class Connection {
 
 	async connect() {
 		return new Promise((res, rej) => {
-			this.mysqlConnection.connect((err) => {
+			this.session.connect((err) => {
 				return err ? rej(err) : res();
 			});
 		});
@@ -95,41 +128,11 @@ class Connection {
 
 	async end() {
 		return new Promise((res, rej) => {
-			this.mysqlConnection.end((err) => {
+			this.session.end((err) => {
 				return err ? rej(err) : res();
 			});
 		});
 	}
-}
-
-function formWhereStmt(query) {
-	return Object.entries(query)
-		.map(([key, value]) => `${escId(key)}=${esc(value)}`)
-		.reduce((cond1, cond2) => `${cond1} AND ${cond2}`, 'TRUE');
-}
-
-function formFieldsAndValuesStmt(entries) {
-	const combinedEntries = entries.reduce(
-		(entry1, entry2) => Object.assign({}, entry1, entry2));
-	
-	const fields = Object.keys(combinedEntries)
-		.map(escId)
-		.join(',');
-
-	const values = entries
-		.map((entry) => Object.keys(combinedEntries)
-			.map((field) => entry[field])
-			.map(esc)
-			.join(','))
-		.join('),(');
-
-	return [fields, values];
-}
-
-function formSetStmt(entry) {
-	return Object.entries(entry)
-		.map(([key, value]) => `${escId(key)}=${esc(value)}`)
-		.join(',');
 }
 
 module.exports = Restql;

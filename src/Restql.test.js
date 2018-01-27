@@ -2,61 +2,69 @@ const td = require('testdouble');
 const chai = require('chai');
 const chai_also = require('chai-also');
 const exec = require('promised-exec');
-const Restql = require('./Restql');
+const {object:mock, when, verify, replace, reset, matchers:{anything}} = require('testdouble');
 
 chai.use(chai_also);
 const expect = chai.expect;
 
 describe('#Restql', () => {
-	before(async function() {
-		// Database initialization takes a while
-		this.timeout(40000);
-		await exec('cat \
-			test/sakila-db/sakila-schema.sql \
-			test/sakila-db/sakila-data.sql \
-			| mysql -u root');
-	});
-
 	let restql;
-	let mockMysql;
+	let mockSession;
+
 	beforeEach(() => {
-		mockMysql = td.replace('mysql');
+		mockSession = mock(['connect', 'end', 'query']);
+		when(mockSession.connect()).thenCallback(null);
+		when(mockSession.end()).thenCallback(null);
+		
+		when(replace(require('mysql'), 'createConnection')(anything()))
+			.thenReturn(mockSession);
+		replace('mysql', require('mysql'));
+
+		const Restql = require('./Restql');
 		restql = new Restql('localhost', 'root', '', 'sakila');
 	}); 
 
 	afterEach(() => {
-		
+		reset();
 	});
 
-	describe('#get', () => {
-		it('should read a record by querying int', async () => {
-			const films = await restql.get('film', {film_id: 2});
-			expect(films).to.have.lengthOf(1);
-			expect(films[0]).to
-				.have.property('film_id', 2)
-				.and.also.property('title', 'ACE GOLDFINGER');
+	describe.only('#get', () => {
+		it('should create query with no condition', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.get('employees', {});
+			verify(mockSession.query('SELECT * FROM `employees`;', anything()));
 		});
 
-		it('should read a record by querying string', async () => {
-			const films = await restql.get('film', {title: 'ACE GOLDFINGER'});
-			expect(films).to.have.lengthOf(1);
-			expect(films[0]).to
-				.have.property('film_id', 2)
-				.and.also.property('title', 'ACE GOLDFINGER');
-
+		it('should create query with one condition', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.get('employees', {employee_id: 1});
+			verify(mockSession.query('SELECT * FROM `employees` WHERE `employee_id`=1;', anything()));
 		});
 
-		it('should fail to read a non-existing record', async () => {
-			const films = await restql.get('film', {film_id: -1});
-			expect(films).to.have.lengthOf(0);
+		it('should create query with multiple conditions', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.get('employees', {employee_id: 1, age: 21});
+			verify(mockSession.query('SELECT * FROM `employees` WHERE `employee_id`=1 AND `age`=21;', anything()));
 		});
 
-		it('should read multiple records by query', async () => {
-			const films = await restql.get('film', {release_year: 2006});
-			expect(films).to.have.lengthOf(1000);
-			for(const film of films) {
-				expect(film).to.have.property('release_year', 2006);
-			}
+		it('should handle no row', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			const employees = await restql.get('employees', {});
+			expect(employees).to.have.lengthOf(0);
+		});
+
+		it('should handle multiple rows', async () => {
+			when(mockSession.query(anything())).thenCallback(null, 
+				[{employee_id: 1, name: 'Adam'}, {employee_id: 2, name: 'Bob'}], {});
+			const employees = await restql.get('employees', {});
+			expect(employees).to.have.lengthOf(2);
+			expect(employees[0])
+				.to.have.property('employee_id', 1)
+				.and.also.property('name', 'Adam');
+			expect(employees[1])
+				.to.have.property('employee_id', 2)
+				.and.also.property('name', 'Bob');
+
 		});
 	});
 
