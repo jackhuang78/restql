@@ -1,11 +1,9 @@
-const td = require('testdouble');
 const chai = require('chai');
+const {expect} = require('chai');
 const chai_also = require('chai-also');
-const exec = require('promised-exec');
 const {object:mock, when, verify, replace, reset, matchers:{anything}} = require('testdouble');
 
 chai.use(chai_also);
-const expect = chai.expect;
 
 describe('#Restql', () => {
 	let restql;
@@ -21,7 +19,7 @@ describe('#Restql', () => {
 		replace('mysql', require('mysql'));
 
 		const Restql = require('./Restql');
-		restql = new Restql('localhost', 'root', '', 'sakila');
+		restql = new Restql('', '', '', '');
 	}); 
 
 	afterEach(() => {
