@@ -67,7 +67,7 @@ class Restql {
 
 class Connection {
 	constructor(host, user, password, database) {
-		this.connection = mysql.createConnection({
+		this.mysqlConnection = mysql.createConnection({
 			host: host,
 			user: user,
 			password: password,
@@ -79,7 +79,7 @@ class Connection {
 	async exec(sql) {
 		return new Promise((res, rej) => {
 			logger.info(`SQL> ${sql}`);
-			this.connection.query(sql, (err, rows, fields) => {
+			this.mysqlConnection.query(sql, (err, rows, fields) => {
 				return err ? rej(err) : res(rows);
 			});
 		});
@@ -87,7 +87,7 @@ class Connection {
 
 	async connect() {
 		return new Promise((res, rej) => {
-			this.connection.connect((err) => {
+			this.mysqlConnection.connect((err) => {
 				return err ? rej(err) : res();
 			});
 		});
@@ -95,7 +95,7 @@ class Connection {
 
 	async end() {
 		return new Promise((res, rej) => {
-			this.connection.end((err) => {
+			this.mysqlConnection.end((err) => {
 				return err ? rej(err) : res();
 			});
 		});
