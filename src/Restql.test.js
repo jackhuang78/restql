@@ -1,3 +1,4 @@
+const td = require('testdouble');
 const chai = require('chai');
 const chai_also = require('chai-also');
 const exec = require('promised-exec');
@@ -17,9 +18,15 @@ describe('#Restql', () => {
 	});
 
 	let restql;
+	let mockMysql;
 	beforeEach(() => {
+		mockMysql = td.replace('mysql');
 		restql = new Restql('localhost', 'root', '', 'sakila');
 	}); 
+
+	afterEach(() => {
+		
+	});
 
 	describe('#get', () => {
 		it('should read a record by querying int', async () => {
