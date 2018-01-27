@@ -28,20 +28,20 @@ describe('#Restql', () => {
 		reset();
 	});
 
-	describe.only('#get', () => {
-		it('should create query with no condition', async () => {
+	describe('#get', () => {
+		it('should create SELECT query with no condition', async () => {
 			when(mockSession.query(anything())).thenCallback(null, [], {});
 			await restql.get('employees', {});
 			verify(mockSession.query('SELECT * FROM `employees`;', anything()));
 		});
 
-		it('should create query with one condition', async () => {
+		it('should create SELECT query with one condition', async () => {
 			when(mockSession.query(anything())).thenCallback(null, [], {});
 			await restql.get('employees', {employee_id: 1});
 			verify(mockSession.query('SELECT * FROM `employees` WHERE `employee_id`=1;', anything()));
 		});
 
-		it('should create query with multiple conditions', async () => {
+		it('should create SELECT query with multiple conditions', async () => {
 			when(mockSession.query(anything())).thenCallback(null, [], {});
 			await restql.get('employees', {employee_id: 1, age: 21});
 			verify(mockSession.query('SELECT * FROM `employees` WHERE `employee_id`=1 AND `age`=21;', anything()));
@@ -56,7 +56,9 @@ describe('#Restql', () => {
 		it('should handle multiple rows', async () => {
 			when(mockSession.query(anything())).thenCallback(null, 
 				[{employee_id: 1, name: 'Adam'}, {employee_id: 2, name: 'Bob'}], {});
+			
 			const employees = await restql.get('employees', {});
+			
 			expect(employees).to.have.lengthOf(2);
 			expect(employees[0])
 				.to.have.property('employee_id', 1)
@@ -64,47 +66,37 @@ describe('#Restql', () => {
 			expect(employees[1])
 				.to.have.property('employee_id', 2)
 				.and.also.property('name', 'Bob');
-
 		});
 	});
 
 	describe('#delete', () => {
-		it('should delete a record', async () => {
-			await restql.delete('film_actor', {film_id: 1, actor_id: 1});
-			const film_actor = await restql.get('film_actor', {film_id: 1, actor_id: 1});
-			expect(film_actor).to.have.lengthOf(0);
+		it('should create DELECT query', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.delete('employees', {age: 21});
+			verify(mockSession.query('DELETE FROM `employees` WHERE `age`=21;', anything()));
 		});
 	});
 
 	describe('#post', () => {
-		it('should create a record', async () => {
-			await restql.post('film', [{title: 'My Film', language_id: 1}]);
-			const films_added = await restql.get('film', {title: 'My Film'});
-			expect(films_added).to.have.lengthOf(1);
-			expect(films_added[0]).to.have.property('title', 'My Film');
+		it('should create INSERT query with one row', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.post('employees', [{name: 'Charles', age: 23}]);
+			verify(mockSession.query('INSERT INTO `employees`(`name`,`age`) VALUES (\'Charles\',23);', anything()));
 		});
 
-		it('should create multiple records', async () => {
-			await restql.post('film', [
-				{title: 'My Film 1', language_id: 1},
-				{title: 'My Film 2', language_id: 1}
-			]);
-			const films_added_1 = await restql.get('film', {title: 'My Film 1'});
-			expect(films_added_1).to.have.lengthOf(1);
-			expect(films_added_1[0]).to.have.property('title', 'My Film 1');
-
-			const films_added_2 = await restql.get('film', {title: 'My Film 2'});
-			expect(films_added_2).to.have.lengthOf(1);
-			expect(films_added_2[0]).to.have.property('title', 'My Film 2');
+		it('should create INSERT query with multiple rows', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.post('employees', 
+				[{name: 'Charles', age: 23}, {name: 'David', age: 24}]);
+			verify(mockSession.query('INSERT INTO `employees`(`name`,`age`) VALUES (\'Charles\',23),(\'David\',24);', anything()));
 		});
 	});
 
 	describe('#put', () => {
-		it('should update a record', async () => {
-			await restql.put('film', {title: 'My Film'}, {film_id: 1});
-			const film_updated = await restql.get('film', {film_id: 1});
-			expect(film_updated).to.have.lengthOf(1);
-			expect(film_updated[0]).to.have.property('title', 'My Film');
+		it('should create UPDATE query', async () => {
+			when(mockSession.query(anything())).thenCallback(null, [], {});
+			await restql.put('employees', {age: 24}, {name: 'Charles'});
+			verify(mockSession.query('UPDATE `employees` SET `age`=24 WHERE `name`=\'Charles\';', anything()));
 		});
 	});
 });
